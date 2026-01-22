@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KARACABAYRE.EST - v43 PRO</title>
+    <title>KARACABAYRE.EST - v43 PRO (Fix)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -42,19 +42,8 @@
         .btn-link { background-color: var(--link-color); }
         .btn-backup { background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-        /* Bildirim Rozeti (UNUTMA İÇİN) */
-        .notification-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: red;
-            color: white;
-            border-radius: 50%;
-            padding: 4px 7px;
-            font-size: 10px;
-            border: 2px solid white;
-            display: none; /* JS ile açılacak */
-        }
+        /* Bildirim Rozeti */
+        .notification-badge { position: absolute; top: -8px; right: -8px; background-color: red; color: white; border-radius: 50%; padding: 4px 7px; font-size: 10px; border: 2px solid white; display: none; }
 
         /* Form Alanı */
         .input-panel { background: #fdfdfd; padding: 20px; border: 1px solid #ddd; border-left: 6px solid var(--primary); margin-bottom: 30px; }
@@ -88,7 +77,7 @@
         .direct-link-btn { display: inline-block; background-color: #3498db; color: white; text-decoration: none; padding: 4px 8px; border-radius: 3px; font-size: 11px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-weight: 600; }
         .link-sahibinden { background-color: #f1c40f; color: black; } 
         .link-hepsi { background-color: #e74c3c; } 
-        .link-maps { background-color: #27ae60; color: white; } /* YENİ HARİTA STİLİ */
+        .link-maps { background-color: #27ae60; color: white; } 
         .link-dosya { background-color: #95a5a6; border: 1px solid #7f8c8d; }
 
         /* Filtre */
@@ -131,7 +120,7 @@
         
         .print-only { display: none; }
         
-        /* PRINT (YAZDIRMA) ÖZEL AYARLARI */
+        /* PRINT AYARLARI */
         @media print { 
             .input-panel, .filter-bar, .backup-controls, .tools-bar, #loginOverlay, .no-print, .btn-print-selected { display: none !important; } 
             .print-only { display: table-cell !important; } 
@@ -140,7 +129,6 @@
             table { width: 100%; font-size: 10px; } 
             th, td { border: 1px solid #ddd; padding: 4px; color: black; } 
             
-            /* SEÇİLENLERİ YAZDIRMA MODU */
             body.print-selected-mode tbody tr:not(.row-selected) { display: none !important; }
             body.print-selected-mode .select-col-header, body.print-selected-mode .select-col-cell { display: none !important; }
         }
@@ -251,7 +239,8 @@
         <table id="portfolioTable">
             <thead>
                 <tr>
-                    <th width="3%" class="select-col-header no-print">Seç</th> <th width="10%">Tür / Durum</th>
+                    <th width="3%" class="select-col-header no-print">Seç</th> 
+                    <th width="10%">Tür / Durum</th>
                     <th width="12%">Lokasyon</th>
                     <th width="8%">Özellikler</th>
                     <th width="10%">m² (Brüt/Net)</th>
@@ -446,7 +435,6 @@
             <button class="tab-btn" onclick="switchTab('tabEmsal')">Emsal</button>
             <button class="tab-btn" onclick="switchTab('tabVergi')">Emlak Vergisi</button>
         </div>
-        
         <div id="tabTapu" class="tab-content active">
             <div class="form-group"><label>Satış Bedeli (TL)</label><input type="number" id="calcPriceComp" placeholder="Örn: 5000000"></div>
             <button class="btn-save" style="width:100%; margin-top:10px;" onclick="calcTapuKomisyon()">HESAPLA</button>
@@ -560,27 +548,8 @@
         window.scrollTo(0,0);
     }
 
-    // --- SEÇİLENLERİ YAZDIRMA FONKSİYONU ---
-    function toggleRowSelection(checkbox) {
-        const row = checkbox.closest('tr');
-        if(checkbox.checked) {
-            row.classList.add('row-selected');
-        } else {
-            row.classList.remove('row-selected');
-        }
-    }
-
-    function printSelected() {
-        const selectedCount = document.querySelectorAll('.row-selected').length;
-        if(selectedCount === 0) {
-            alert("Lütfen önce listeden yazdırmak istediğiniz satırları seçin (sol baştaki kutucuk).");
-            return;
-        }
-        document.body.classList.add('print-selected-mode');
-        window.print();
-        document.body.classList.remove('print-selected-mode');
-    }
-    // ----------------------------------------
+    function toggleRowSelection(checkbox) { const row = checkbox.closest('tr'); if(checkbox.checked) row.classList.add('row-selected'); else row.classList.remove('row-selected'); }
+    function printSelected() { const selectedCount = document.querySelectorAll('.row-selected').length; if(selectedCount === 0) { alert("Lütfen önce listeden yazdırmak istediğiniz satırları seçin (sol baştaki kutucuk)."); return; } document.body.classList.add('print-selected-mode'); window.print(); document.body.classList.remove('print-selected-mode'); }
 
     function renderTable() {
         const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
@@ -615,24 +584,11 @@
         });
 
         filtered.sort((a, b) => {
-            const getStatusScore = (s) => {
-                if (s === 'Satıldı') return 3;
-                if (s === 'Kiralandı') return 2;
-                return 1;
-            };
-            const scoreA = getStatusScore(a.status);
-            const scoreB = getStatusScore(b.status);
+            const getStatusScore = (s) => { if (s === 'Satıldı') return 3; if (s === 'Kiralandı') return 2; return 1; };
+            const scoreA = getStatusScore(a.status); const scoreB = getStatusScore(b.status);
             if (scoreA !== scoreB) return scoreA - scoreB;
-            if (scoreA === 1) {
-                const ownerA = a.ownership || 'BANA AİT';
-                const ownerB = b.ownership || 'BANA AİT';
-                if (ownerA !== ownerB) {
-                    return ownerA === 'BANA AİT' ? -1 : 1;
-                }
-            }
-            const typeA = (a.type || '').toLowerCase();
-            const typeB = (b.type || '').toLowerCase();
-            if (typeA !== typeB) return typeA.localeCompare(typeB, 'tr');
+            if (scoreA === 1) { const ownerA = a.ownership || 'BANA AİT'; const ownerB = b.ownership || 'BANA AİT'; if (ownerA !== ownerB) return ownerA === 'BANA AİT' ? -1 : 1; }
+            const typeA = (a.type || '').toLowerCase(); const typeB = (b.type || '').toLowerCase(); if (typeA !== typeB) return typeA.localeCompare(typeB, 'tr');
             return b.id - a.id;
         });
 
@@ -642,11 +598,7 @@
             let floorInfo = item.floor; if(item.floorCount) floorInfo += `<br><small>Top: ${item.floorCount}</small>`;
             let currSymbol = item.currency || '₺';
             let btnDesc = item.desc ? `<button onclick="document.getElementById('modalText').innerText='${item.desc.replace(/\n/g,'\\n').replace(/'/g, "\\'")}'; document.getElementById('descModal').style.display='block';" class="btn-icon no-print" style="background:#9b59b6;border:none;color:white;border-radius:3px;cursor:pointer;">📝</button>` : '-';
-            
-            let own = item.ownership || 'BANA AİT';
-            let ownBadgeClass = (own === 'PAYLAŞIMLI') ? 'badge-shared' : 'badge-own';
-            let ownLabel = (own === 'PAYLAŞIMLI') ? 'PAYLAŞIMLI' : 'BANA AİT';
-            
+            let own = item.ownership || 'BANA AİT'; let ownBadgeClass = (own === 'PAYLAŞIMLI') ? 'badge-shared' : 'badge-own'; let ownLabel = (own === 'PAYLAŞIMLI') ? 'PAYLAŞIMLI' : 'BANA AİT';
             let cityDisplay = item.city && item.city !== "Antalya" ? `<b>${item.city}</b>/` : "";
 
             let btnLinkHtml = '-'; 
@@ -655,18 +607,13 @@
                 item.link.split('\n').forEach(l => { 
                     let r = l.trim(); 
                     if(r){ 
-                        let lbl="Web Linki"; let cls=""; let isF=false; 
-                        let icon = "fa-link";
-                        // AKILLI HARİTA ALGILAMA
-                        if(r.includes("maps") || r.includes("goo.gl") || r.includes("konum")) {
-                             lbl="KONUM"; cls="link-maps"; icon="fa-location-dot";
-                        }
+                        let lbl="Web Linki"; let cls=""; let isF=false; let icon = "fa-link";
+                        if(r.includes("maps") || r.includes("goo.gl") || r.includes("konum")) { lbl="KONUM"; cls="link-maps"; icon="fa-location-dot"; }
                         else if(r.includes("sahibinden")) {lbl="Sahibinden";cls="link-sahibinden";} 
                         else if(r.includes("hepsi")) {lbl="HepsiEmlak";cls="link-hepsi";} 
                         else if(r.includes("obudur")) {lbl="Obudur";cls="link-obudur";} 
                         else if(r.includes("facebook")||r.includes("instagram")){lbl="Sosyal";cls="link-sosyal";} 
                         else if(r.includes("▸")||r.includes("icloud")||r.startsWith("/")||r.startsWith("\\\\")||/^[a-z]:/i.test(r)||r.includes("\\")||/\.(pdf|docx?|txt|jpg|png)$/i.test(r)){lbl="Dosya";cls="link-dosya";isF=true;} 
-                        
                         let href=r; if(!isF && !href.startsWith('http')) href='https://'+href; 
                         if(isF) btnLinkHtml += `<button onclick="alert('Dosya Yolu:\\n${r.replace(/\\/g,'\\\\')}')" class="direct-link-btn ${cls} no-print" style="border:none;cursor:pointer;">${lbl}</button><br>`; 
                         else btnLinkHtml += `<a href="${href}" target="_blank" class="direct-link-btn ${cls} no-print"><i class="fa-solid ${icon}"></i> ${lbl}</a><br>`; 
@@ -707,18 +654,13 @@
         handleCityChange('inpCity', 'inpDistrict', 'dl_mahalle_ekle');
     }
 
-    // --- CHECKLIST & BADGE ---
     function renderChecklist() { 
         const c = document.getElementById('checklistContainer'); c.innerHTML = ''; 
         const badge = document.getElementById('chkBadge');
-        
-        // Aktif (yapılmamış) görev sayısını bul
         const pendingCount = checklist.filter(item => !item.done).length;
         badge.innerText = pendingCount;
-        badge.style.display = pendingCount > 0 ? 'inline-block' : 'none'; // 0 ise gizle
-
+        badge.style.display = pendingCount > 0 ? 'inline-block' : 'none'; 
         if(checklist.length === 0) { c.innerHTML = '<div style="padding:15px; color:#999; text-align:center;">Henüz hatırlatma yok.</div>'; return; } 
-        
         checklist.forEach((item, index) => { 
             const cls = item.done ? 'checked' : ''; 
             c.innerHTML += `<div class="checklist-item ${cls}"><div style="display:flex; align-items:center; cursor:pointer; flex:1;" onclick="toggleCheck(${index})"><i class="fa-regular ${item.done ? 'fa-square-check' : 'fa-square'}" style="color:${item.done ? '#27ae60':'#ccc'}; font-size:18px;"></i><span style="margin-left:10px; flex:1;">${item.text}</span></div><button onclick="deleteCheck(${index})" style="background:none; border:none; color:#c0392b; cursor:pointer;"><i class="fa-solid fa-trash"></i></button></div>`; 
@@ -738,7 +680,34 @@
     function closeModalOutside(e, id) { if(e.target == document.getElementById(id)) closeModal(id); }
     function saveToDisk() { localStorage.setItem('KaracabayRE_EST_DB_v19', JSON.stringify(portfolio)); }
     function downloadData() { const d = { portfolio: portfolio, crm: crmData, checklist: checklist }; const a = document.createElement('a'); a.href = "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(d)); a.download = "Karacabay_Yedek.json"; document.body.appendChild(a); a.click(); a.remove(); }
-    function uploadData(input) { const f = input.files[0]; if(!f) return; const r = new FileReader(); r.onload = e => { if(confirm("Yüklensin mi?")) { const d = JSON.parse(e.target.result); if(d.portfolio) { portfolio=d.portfolio; crmData=d.crm; checklist=d.checklist||[]; } else portfolio=d; saveToDisk(); localStorage.setItem('KaracabayRE_CRM_v19', JSON.stringify(crmData)); localStorage.setItem('KaracabayRE_CHK_v1', JSON.stringify(checklist)); renderTable(); renderChecklist(); alert("Tamam!"); } }; r.readAsText(f); }
+    
+    // GÜNCELLENMİŞ YÜKLEME FONKSİYONU
+    function uploadData(input) { 
+        const f = input.files[0]; if(!f) return; 
+        const r = new FileReader(); 
+        r.onload = e => { 
+            try {
+                const d = JSON.parse(e.target.result); 
+                if(confirm("Mevcut verilerin üzerine yedek yüklensin mi?")) { 
+                    if(d.portfolio && Array.isArray(d.portfolio)) { 
+                        portfolio=d.portfolio; crmData=d.crm||{investors:[],network:[]}; checklist=d.checklist||[]; 
+                    } else if(Array.isArray(d)) {
+                         portfolio=d; 
+                    } else {
+                         alert("Yedek dosyası formatı tanınamadı!"); return;
+                    }
+                    saveToDisk(); 
+                    localStorage.setItem('KaracabayRE_CRM_v19', JSON.stringify(crmData)); 
+                    localStorage.setItem('KaracabayRE_CHK_v1', JSON.stringify(checklist)); 
+                    alert("Yedek yüklendi! Sayfa yenileniyor...");
+                    location.reload(); 
+                } 
+            } catch(err) { alert("Dosya hatası: " + err); }
+            input.value = '';
+        }; 
+        r.readAsText(f); 
+    }
+    
     function deleteFromForm() { if(confirm('SİLİNECEK!')) { portfolio = portfolio.filter(item => item.id !== editingId); saveToDisk(); renderTable(); resetForm(); } }
     
     function populateSelects() { 
