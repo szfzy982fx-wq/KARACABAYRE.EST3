@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KARACABAYRE.EST - v49 (Backup Fix)</title>
+    <title>KARACABAYRE.EST - v50 (Tek Tuş Yazdır)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -122,6 +122,7 @@
         
         .print-only { display: none; }
         
+        /* --- YENİ YAZDIRMA MANTIĞI --- */
         @media print { 
             .input-panel, .filter-bar, .backup-controls, .tools-bar, #loginOverlay, .no-print, .btn-print-selected, .btn-whatsapp-selected { display: none !important; } 
             .print-only { display: table-cell !important; } 
@@ -129,7 +130,11 @@
             body { background: white; padding: 0; margin: 0; } 
             table { width: 100%; font-size: 10px; } 
             th, td { border: 1px solid #ddd; padding: 4px; color: black; } 
+            
+            /* ÖNEMLİ: Seçilmeyen satırları yazdırma modunda GİZLE */
             body.print-selected-mode tbody tr:not(.row-selected) { display: none !important; }
+            
+            /* Seçim sütununu kağıtta gizle */
             body.print-selected-mode .select-col-header, body.print-selected-mode .select-col-cell { display: none !important; }
         }
     </style>
@@ -139,7 +144,7 @@
 <div id="loginOverlay">
     <div class="login-box">
         <h2>🔒 GÜVENLİ GİRİŞ</h2>
-        <p>KaracabayRE.EST v49</p>
+        <p>KaracabayRE.EST v50</p>
         <input type="password" id="loginPin" placeholder="Şifre (1923)" inputmode="numeric">
         <button onclick="checkLogin()">GİRİŞ YAP</button>
     </div>
@@ -148,7 +153,7 @@
 <div id="appContainer">
     <div class="container">
         <header>
-            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v49 (Backup Fix)</span></h1></div>
+            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v50 (Tek Tuş)</span></h1></div>
             <div class="backup-controls">
                 <input type="file" id="fileUpload" style="display:none;" onclick="this.value=null" onchange="uploadData(this)">
                 <button class="btn-backup" onclick="document.getElementById('fileUpload').click()">📂 YÜKLE</button>
@@ -232,14 +237,13 @@
             <button class="btn-clear-filter" onclick="clearFilters()" title="Filtreleri ve Seçimleri Sıfırla"><i class="fa-solid fa-rotate-left"></i> TEMİZLE</button>
             
             <button class="btn-print-selected" onclick="printSelected()">
-                <i class="fa-solid fa-check-double"></i> YAZDIR
+                <i class="fa-solid fa-check-double"></i> SEÇİLENLERİ YAZDIR
             </button>
             <button class="btn-whatsapp-selected" onclick="sendSelectedToWhatsapp()">
                 <i class="fa-brands fa-whatsapp"></i> WP GÖNDER
             </button>
 
-            <button onclick="window.print()" style="margin-left:5px; background:#34495e; border:none; color:white; padding:8px 15px; border-radius:4px; cursor:pointer;" title="Hepsini Yazdır">🖨️ TÜMÜ</button>
-        </div>
+            </div>
 
         <table id="portfolioTable">
             <thead>
@@ -263,7 +267,7 @@
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
-        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v49 Backup Fix)</div>
+        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v50 Final Tek Tuş)</div>
     </div>
 </div>
 
@@ -509,14 +513,12 @@
         const dl = document.getElementById(datalistId); dl.innerHTML = '';
     }
 
-    // --- TEMİZLEME FONKSİYONU ---
     function clearFilters() {
         document.getElementById('searchBox').value = '';
         document.getElementById('filterOwnership').value = 'all';
         document.getElementById('filterType').value = 'all';
         document.getElementById('filterStatus').value = 'all';
 
-        // Varsayılan olarak Antalya'ya dön
         const citySelect = document.getElementById('filterCity');
         citySelect.value = 'Antalya'; 
 
@@ -589,14 +591,27 @@
     function toggleAllSelections(source) {
         const checkboxes = document.querySelectorAll('#tableBody input[type="checkbox"]');
         checkboxes.forEach(cb => {
-            cb.checked = source.checked;
-            toggleRowSelection(cb);
+            // Sadece görünür satırları seçmek için (filtrede kolaylık olsun diye)
+            if(cb.offsetParent !== null) {
+                cb.checked = source.checked;
+                toggleRowSelection(cb);
+            }
         });
     }
 
     function toggleRowSelection(checkbox) { const row = checkbox.closest('tr'); if(checkbox.checked) row.classList.add('row-selected'); else row.classList.remove('row-selected'); }
     
-    function printSelected() { const selectedCount = document.querySelectorAll('.row-selected').length; if(selectedCount === 0) { alert("Lütfen önce listeden yazdırmak istediğiniz satırları seçin (sol baştaki kutucuk)."); return; } document.body.classList.add('print-selected-mode'); window.print(); document.body.classList.remove('print-selected-mode'); }
+    // --- GÜNCELLENEN YAZDIRMA FONKSİYONU ---
+    function printSelected() { 
+        const selectedCount = document.querySelectorAll('.row-selected').length; 
+        if(selectedCount === 0) { 
+            alert("⚠️ Lütfen listeden yazdırmak istediğiniz kayıtları seçin (sol baştaki kutucuklar)."); 
+            return; 
+        } 
+        document.body.classList.add('print-selected-mode'); 
+        window.print(); 
+        document.body.classList.remove('print-selected-mode'); 
+    }
     
     function sendSelectedToWhatsapp() {
         const selectedCheckboxes = document.querySelectorAll('.row-selected input[type="checkbox"]');
@@ -761,7 +776,6 @@
     function saveToDisk() { localStorage.setItem('KaracabayRE_EST_DB_v19', JSON.stringify(portfolio)); }
     function downloadData() { const d = { portfolio: portfolio, crm: crmData, checklist: checklist }; const a = document.createElement('a'); a.href = "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(d)); a.download = "Karacabay_Yedek.json"; document.body.appendChild(a); a.click(); a.remove(); }
     
-    // --- GÜÇLENDİRİLMİŞ YÜKLEME FONKSİYONU ---
     function uploadData(input) { 
         const f = input.files[0]; if(!f) return; 
         const r = new FileReader(); 
@@ -781,8 +795,6 @@
                     localStorage.setItem('KaracabayRE_CHK_v1', JSON.stringify(checklist)); 
                     alert("Yedek başarıyla yüklendi! Lütfen bekleyin...");
                     
-                    // YENİLİK: Sayfayı yenilemeden önce filtreleri temizle ki yüklenen veriler görünsün
-                    // Ama Antalya varsayılanı yerine TÜMÜ yapıyoruz ki her şeyi görebilesiniz.
                     const fCity = document.getElementById('filterCity');
                     fCity.innerHTML = '<option value="all">Tüm İller</option><option value="Antalya">Antalya</option>';
                     Object.keys(turkiyeData).sort().forEach(city => { if(city !== "Antalya") fCity.innerHTML += `<option value="${city}">${city}</option>`; });
@@ -790,7 +802,6 @@
                     handleCityChange('filterCity', 'filterDistrict', 'dl_mahalle_filtre');
                     renderTable();
                     renderChecklist();
-                    // Yükleme tamamlandı, inputu temizle
                     input.value = '';
                 } 
             } catch(err) { alert("Dosya hatası: " + err); input.value = ''; }
