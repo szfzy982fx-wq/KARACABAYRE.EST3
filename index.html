@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KARACABAYRE.EST - v43 PRO (Fix)</title>
+    <title>KARACABAYRE.EST - v44 (WP)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -18,6 +18,7 @@
             --sold: #d63031;
             --warning-bg: #fff3cd;
             --alert-bg: #f8d7da;
+            --whatsapp: #25D366; /* YENİ WHATSAPP RENGİ */
         }
         body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 20px; color: #333; }
         
@@ -85,8 +86,9 @@
         .filter-bar input, .filter-bar select { padding: 8px; border: none; border-radius: 4px; color: #333; }
         .btn-clear-filter { background: #95a5a6; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: auto; }
 
-        /* SEÇİLENLERİ YAZDIR BUTONU */
+        /* YENİ BUTONLAR */
         .btn-print-selected { background: #8e44ad; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; display:flex; align-items:center; gap:5px; }
+        .btn-whatsapp-selected { background: var(--whatsapp); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; display:flex; align-items:center; gap:5px; margin-left:5px; }
 
         /* Modals */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; overflow-y: hidden; }
@@ -122,7 +124,7 @@
         
         /* PRINT AYARLARI */
         @media print { 
-            .input-panel, .filter-bar, .backup-controls, .tools-bar, #loginOverlay, .no-print, .btn-print-selected { display: none !important; } 
+            .input-panel, .filter-bar, .backup-controls, .tools-bar, #loginOverlay, .no-print, .btn-print-selected, .btn-whatsapp-selected { display: none !important; } 
             .print-only { display: table-cell !important; } 
             #appContainer { display: block !important; } 
             body { background: white; padding: 0; margin: 0; } 
@@ -139,7 +141,7 @@
 <div id="loginOverlay">
     <div class="login-box">
         <h2>🔒 GÜVENLİ GİRİŞ</h2>
-        <p>KaracabayRE.EST v43 PRO</p>
+        <p>KaracabayRE.EST v44</p>
         <input type="password" id="loginPin" placeholder="Şifre (1923)" inputmode="numeric">
         <button onclick="checkLogin()">GİRİŞ YAP</button>
     </div>
@@ -148,7 +150,7 @@
 <div id="appContainer">
     <div class="container">
         <header>
-            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v43 PRO</span></h1></div>
+            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v44 (WP)</span></h1></div>
             <div class="backup-controls">
                 <input type="file" id="fileUpload" style="display:none;" onchange="uploadData(this)">
                 <button class="btn-backup" onclick="document.getElementById('fileUpload').click()">📂 YÜKLE</button>
@@ -231,8 +233,12 @@
             <button class="btn-clear-filter" onclick="clearFilters()"><i class="fa-solid fa-rotate-left"></i> TEMİZLE</button>
             
             <button class="btn-print-selected" onclick="printSelected()">
-                <i class="fa-solid fa-check-double"></i> SEÇİLENLERİ YAZDIR
+                <i class="fa-solid fa-check-double"></i> YAZDIR
             </button>
+            <button class="btn-whatsapp-selected" onclick="sendSelectedToWhatsapp()">
+                <i class="fa-brands fa-whatsapp"></i> WP GÖNDER
+            </button>
+
             <button onclick="window.print()" style="margin-left:5px; background:#34495e; border:none; color:white; padding:8px 15px; border-radius:4px; cursor:pointer;" title="Hepsini Yazdır">🖨️ TÜMÜ</button>
         </div>
 
@@ -255,7 +261,7 @@
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
-        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v43 PRO)</div>
+        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v44 WP)</div>
     </div>
 </div>
 
@@ -549,7 +555,48 @@
     }
 
     function toggleRowSelection(checkbox) { const row = checkbox.closest('tr'); if(checkbox.checked) row.classList.add('row-selected'); else row.classList.remove('row-selected'); }
+    
     function printSelected() { const selectedCount = document.querySelectorAll('.row-selected').length; if(selectedCount === 0) { alert("Lütfen önce listeden yazdırmak istediğiniz satırları seçin (sol baştaki kutucuk)."); return; } document.body.classList.add('print-selected-mode'); window.print(); document.body.classList.remove('print-selected-mode'); }
+    
+    // YENİ WHATSAPP FONKSİYONU
+    function sendSelectedToWhatsapp() {
+        const selectedCheckboxes = document.querySelectorAll('.row-selected input[type="checkbox"]');
+        if(selectedCheckboxes.length === 0) { alert("Lütfen önce listeden göndermek istediğiniz portföyleri seçin."); return; }
+        
+        let msg = "*📢 SEÇİLEN PORTFÖYLER*\n\n";
+        
+        selectedCheckboxes.forEach(cb => {
+            // Checkbox'ın bulunduğu satırdaki 'DÜZENLE' butonunu bulup ID'sini alıyoruz (En güvenli yöntem)
+            const row = cb.closest('tr');
+            const editBtn = row.querySelector('button[onclick^="editRecord"]');
+            if(editBtn) {
+                const idMatch = editBtn.getAttribute('onclick').match(/\d+/);
+                if(idMatch) {
+                    const id = parseInt(idMatch[0]);
+                    const item = portfolio.find(p => p.id === id);
+                    if(item) {
+                        const city = item.city || "Antalya";
+                        const price = item.price + " " + (item.currency || '₺');
+                        const loc = `${city}/${item.district} - ${item.neighborhood}`;
+                        const typeStatus = `${item.status} ${item.type}`;
+                        
+                        msg += `🏠 *${typeStatus}*\n📍 ${loc}\n💰 ${price}\nℹ️ ${item.rooms} | ${item.gross}m²\n`;
+                        
+                        // Link varsa ekle
+                        if(item.link) {
+                            const links = item.link.split('\n');
+                            links.forEach(l => {
+                                if(l.trim().startsWith('http')) msg += `🔗 ${l.trim()}\n`;
+                            });
+                        }
+                        msg += "-------------------\n";
+                    }
+                }
+            }
+        });
+        
+        window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    }
 
     function renderTable() {
         const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
@@ -681,7 +728,6 @@
     function saveToDisk() { localStorage.setItem('KaracabayRE_EST_DB_v19', JSON.stringify(portfolio)); }
     function downloadData() { const d = { portfolio: portfolio, crm: crmData, checklist: checklist }; const a = document.createElement('a'); a.href = "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(d)); a.download = "Karacabay_Yedek.json"; document.body.appendChild(a); a.click(); a.remove(); }
     
-    // GÜNCELLENMİŞ YÜKLEME FONKSİYONU
     function uploadData(input) { 
         const f = input.files[0]; if(!f) return; 
         const r = new FileReader(); 
