@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KARACABAYRE.EST - v48 (Antalya Default)</title>
+    <title>KARACABAYRE.EST - v49 (Backup Fix)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -139,7 +139,7 @@
 <div id="loginOverlay">
     <div class="login-box">
         <h2>🔒 GÜVENLİ GİRİŞ</h2>
-        <p>KaracabayRE.EST v48</p>
+        <p>KaracabayRE.EST v49</p>
         <input type="password" id="loginPin" placeholder="Şifre (1923)" inputmode="numeric">
         <button onclick="checkLogin()">GİRİŞ YAP</button>
     </div>
@@ -148,9 +148,9 @@
 <div id="appContainer">
     <div class="container">
         <header>
-            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v48 (Antalya)</span></h1></div>
+            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v49 (Backup Fix)</span></h1></div>
             <div class="backup-controls">
-                <input type="file" id="fileUpload" style="display:none;" onchange="uploadData(this)">
+                <input type="file" id="fileUpload" style="display:none;" onclick="this.value=null" onchange="uploadData(this)">
                 <button class="btn-backup" onclick="document.getElementById('fileUpload').click()">📂 YÜKLE</button>
                 <button class="btn-backup" onclick="downloadData()">💾 YEDEKLE</button>
             </div>
@@ -263,7 +263,7 @@
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
-        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v48 Antalya Default)</div>
+        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v49 Backup Fix)</div>
     </div>
 </div>
 
@@ -493,13 +493,10 @@
 
     window.onload = function() { populateSelects(); renderTable(); renderChecklist(); };
 
-    // --- DÜZELTİLEN FONKSİYON: HANDLE CITY CHANGE ---
-    // Artık ilçe seçiminizi temizlerken "Tümü" seçeneğini silmiyor.
     function handleCityChange(citySelectId, districtSelectId, datalistId) {
         const city = document.getElementById(citySelectId).value;
         const districtSelect = document.getElementById(districtSelectId);
         
-        // EĞER FİLTRE KISMINDAYSAK "İlçe (Tümü)" SEÇENEĞİNİ KOY, YOKSA "Seçiniz" KOY
         if(districtSelectId === 'filterDistrict') {
              districtSelect.innerHTML = '<option value="all">İlçe</option>';
         } else {
@@ -512,42 +509,32 @@
         const dl = document.getElementById(datalistId); dl.innerHTML = '';
     }
 
-    // --- DÜZELTİLEN VE SAĞLAMLAŞTIRILAN FİLTRE TEMİZLEME ---
+    // --- TEMİZLEME FONKSİYONU ---
     function clearFilters() {
-        // 1. Text Search
         document.getElementById('searchBox').value = '';
-
-        // 2. Dropdowns
         document.getElementById('filterOwnership').value = 'all';
         document.getElementById('filterType').value = 'all';
         document.getElementById('filterStatus').value = 'all';
 
-        // 3. Location (City & District) - HARD RESET to ANTALYA
         // Varsayılan olarak Antalya'ya dön
         const citySelect = document.getElementById('filterCity');
         citySelect.value = 'Antalya'; 
 
-        // Antalya seçildiği için ilçeleri yükle
         handleCityChange('filterCity', 'filterDistrict', 'dl_mahalle_filtre');
 
-        // İlçeyi "İlçe (Tümü)" yap
         const districtSelect = document.getElementById('filterDistrict');
         districtSelect.value = 'all';
 
-        // 4. Diğer inputlar
         document.getElementById('filterNeighborhood').value = '';
         document.getElementById('filterRooms').value = '';
         document.getElementById('filterMinPrice').value = '';
         document.getElementById('filterMaxPrice').value = '';
         
-        // Datalist temizle
         document.getElementById('dl_mahalle_filtre').innerHTML = '';
 
-        // 5. Seçili Kutucukları (Checkbox) Sıfırla
         const masterCb = document.getElementById('masterCheckbox');
         if(masterCb) masterCb.checked = false;
         
-        // 6. RENDER
         renderTable();
     }
 
@@ -774,6 +761,7 @@
     function saveToDisk() { localStorage.setItem('KaracabayRE_EST_DB_v19', JSON.stringify(portfolio)); }
     function downloadData() { const d = { portfolio: portfolio, crm: crmData, checklist: checklist }; const a = document.createElement('a'); a.href = "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(d)); a.download = "Karacabay_Yedek.json"; document.body.appendChild(a); a.click(); a.remove(); }
     
+    // --- GÜÇLENDİRİLMİŞ YÜKLEME FONKSİYONU ---
     function uploadData(input) { 
         const f = input.files[0]; if(!f) return; 
         const r = new FileReader(); 
@@ -791,11 +779,21 @@
                     saveToDisk(); 
                     localStorage.setItem('KaracabayRE_CRM_v19', JSON.stringify(crmData)); 
                     localStorage.setItem('KaracabayRE_CHK_v1', JSON.stringify(checklist)); 
-                    alert("Yedek yüklendi! Sayfa yenileniyor...");
-                    location.reload(); 
+                    alert("Yedek başarıyla yüklendi! Lütfen bekleyin...");
+                    
+                    // YENİLİK: Sayfayı yenilemeden önce filtreleri temizle ki yüklenen veriler görünsün
+                    // Ama Antalya varsayılanı yerine TÜMÜ yapıyoruz ki her şeyi görebilesiniz.
+                    const fCity = document.getElementById('filterCity');
+                    fCity.innerHTML = '<option value="all">Tüm İller</option><option value="Antalya">Antalya</option>';
+                    Object.keys(turkiyeData).sort().forEach(city => { if(city !== "Antalya") fCity.innerHTML += `<option value="${city}">${city}</option>`; });
+                    fCity.value = 'all';
+                    handleCityChange('filterCity', 'filterDistrict', 'dl_mahalle_filtre');
+                    renderTable();
+                    renderChecklist();
+                    // Yükleme tamamlandı, inputu temizle
+                    input.value = '';
                 } 
-            } catch(err) { alert("Dosya hatası: " + err); }
-            input.value = '';
+            } catch(err) { alert("Dosya hatası: " + err); input.value = ''; }
         }; 
         r.readAsText(f); 
     }
@@ -821,13 +819,9 @@
         const fL=document.getElementById('inpFloor'); floorList.forEach(f=>fL.innerHTML+=`<option>${f}</option>`); 
     }
 
-    function handleCityChange(citySelectId, districtSelectId, datalistId) {
-        const city = document.getElementById(citySelectId).value; const districtSelect = document.getElementById(districtSelectId);
-        districtSelect.innerHTML = '<option value="">Seçiniz</option>'; 
-        if (city === "all") return;
-        const districts = turkiyeData[city] || [];
-        districts.sort().forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.innerText = d; districtSelect.appendChild(opt); });
-        const dl = document.getElementById(datalistId); dl.innerHTML = '';
+    function loadMahalleler(citySelectId, districtSelectId, datalistId) { 
+        const city = document.getElementById(citySelectId).value; const district = document.getElementById(districtSelectId).value; const dl = document.getElementById(datalistId); dl.innerHTML = ''; 
+        if(city === "Antalya" && antalyaData[district]) { antalyaData[district].sort().forEach(m=>{ let o=document.createElement('option'); o.value=m; dl.appendChild(o); }); }
     }
     
     // CRM
