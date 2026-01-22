@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KARACABAYRE.EST - v45 (Select&Clear)</title>
+    <title>KARACABAYRE.EST - v46 (Fix)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -66,7 +66,7 @@
         
         tr.row-sold { background-color: #fff5f5; color: #999; }
         tr.row-rented { background-color: #fcf8e3; color: #777; }
-        tr.row-selected { background-color: #d1f2eb !important; } /* SEÇİLİ SATIR RENGİ */
+        tr.row-selected { background-color: #d1f2eb !important; }
         
         .badge { padding: 3px 6px; border-radius: 3px; color: white; font-size: 10px; font-weight: bold; display:inline-block; margin-bottom: 2px; }
         .satilik { background: #27ae60; } .kiralik { background: #e67e22; } .kirmizi-etiket { background: var(--sold) !important; }
@@ -139,7 +139,7 @@
 <div id="loginOverlay">
     <div class="login-box">
         <h2>🔒 GÜVENLİ GİRİŞ</h2>
-        <p>KaracabayRE.EST v45</p>
+        <p>KaracabayRE.EST v46</p>
         <input type="password" id="loginPin" placeholder="Şifre (1923)" inputmode="numeric">
         <button onclick="checkLogin()">GİRİŞ YAP</button>
     </div>
@@ -148,7 +148,7 @@
 <div id="appContainer">
     <div class="container">
         <header>
-            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v45 (Seç & Temizle)</span></h1></div>
+            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v46 (Temizle Fix)</span></h1></div>
             <div class="backup-controls">
                 <input type="file" id="fileUpload" style="display:none;" onchange="uploadData(this)">
                 <button class="btn-backup" onclick="document.getElementById('fileUpload').click()">📂 YÜKLE</button>
@@ -262,7 +262,7 @@
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
-        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v45 Select&Clear)</div>
+        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v46 Fix)</div>
     </div>
 </div>
 
@@ -492,7 +492,26 @@
 
     window.onload = function() { populateSelects(); renderTable(); renderChecklist(); };
 
-    // GÜNCELLENEN TEMİZLEME FONKSİYONU
+    // --- DÜZELTİLEN FONKSİYON: HANDLE CITY CHANGE ---
+    // Artık ilçe seçiminizi temizlerken "Tümü" seçeneğini silmiyor.
+    function handleCityChange(citySelectId, districtSelectId, datalistId) {
+        const city = document.getElementById(citySelectId).value;
+        const districtSelect = document.getElementById(districtSelectId);
+        
+        // EĞER FİLTRE KISMINDAYSAK "İlçe (Tümü)" SEÇENEĞİNİ KOY, YOKSA "Seçiniz" KOY
+        if(districtSelectId === 'filterDistrict') {
+             districtSelect.innerHTML = '<option value="all">İlçe</option>';
+        } else {
+             districtSelect.innerHTML = '<option value="">Seçiniz</option>'; 
+        }
+
+        if (city === "all") return;
+        const districts = turkiyeData[city] || [];
+        districts.sort().forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.innerText = d; districtSelect.appendChild(opt); });
+        const dl = document.getElementById(datalistId); dl.innerHTML = '';
+    }
+
+    // --- DÜZELTİLEN FONKSİYON: CLEAR FILTERS ---
     function clearFilters() {
         // 1. Filtreleri Sıfırla
         document.getElementById('searchBox').value = '';
@@ -500,7 +519,10 @@
         document.getElementById('filterType').value = 'all';
         document.getElementById('filterStatus').value = 'all';
         document.getElementById('filterCity').value = 'all';
+        
+        // İlçe listesini "Tümü" olacak şekilde yeniden oluştur
         handleCityChange('filterCity', 'filterDistrict', 'dl_mahalle_filtre');
+        
         document.getElementById('filterDistrict').value = 'all';
         document.getElementById('filterNeighborhood').value = '';
         document.getElementById('filterRooms').value = '';
@@ -511,7 +533,7 @@
         const masterCb = document.getElementById('masterCheckbox');
         if(masterCb) masterCb.checked = false;
         
-        // 3. Tabloyu Yenile (Bu işlem satır seçimlerini de sıfırlar)
+        // 3. Tabloyu Yenile (LİSTE ARTIK GERİ GELECEK)
         renderTable();
     }
 
@@ -563,7 +585,6 @@
         window.scrollTo(0,0);
     }
 
-    // YENİ: TÜMÜNÜ SEÇ / KALDIR
     function toggleAllSelections(source) {
         const checkboxes = document.querySelectorAll('#tableBody input[type="checkbox"]');
         checkboxes.forEach(cb => {
@@ -775,15 +796,6 @@
         const tS=document.getElementById('inpType'), fT=document.getElementById('filterType'); 
         typeList.forEach(t=>{tS.innerHTML+=`<option>${t}</option>`;fT.innerHTML+=`<option>${t}</option>`;});
         const fL=document.getElementById('inpFloor'); floorList.forEach(f=>fL.innerHTML+=`<option>${f}</option>`); 
-    }
-
-    function handleCityChange(citySelectId, districtSelectId, datalistId) {
-        const city = document.getElementById(citySelectId).value; const districtSelect = document.getElementById(districtSelectId);
-        districtSelect.innerHTML = '<option value="">Seçiniz</option>'; 
-        if (city === "all") return;
-        const districts = turkiyeData[city] || [];
-        districts.sort().forEach(d => { const opt = document.createElement('option'); opt.value = d; opt.innerText = d; districtSelect.appendChild(opt); });
-        const dl = document.getElementById(datalistId); dl.innerHTML = '';
     }
 
     function loadMahalleler(citySelectId, districtSelectId, datalistId) { 
