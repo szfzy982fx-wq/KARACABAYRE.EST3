@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KARACABAYRE.EST - v55 (Print White BG Fix)</title>
+    <title>KARACABAYRE.EST - v56 (Final Design)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -31,7 +31,11 @@
         /* Ana Yapı */
         #appContainer { display: none; }
         .container { max-width: 1800px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+        
+        /* HEADER DÜZENLEMESİ */
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+        .app-title-group h1 { margin: 0; line-height: 1; }
+        .app-subtitle { font-size: 16px; font-weight: 800; color: #7f8c8d; letter-spacing: 3px; margin-top: 8px; margin-left: 2px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
         
         /* Toolbar */
         .tools-bar { display: flex; gap: 10px; background: var(--tool-bg); padding: 10px; border-radius: 6px; margin-bottom: 25px; border: 1px solid #ddd; flex-wrap: wrap; }
@@ -72,6 +76,13 @@
         .satilik { background: #27ae60; } .kiralik { background: #e67e22; } .kirmizi-etiket { background: var(--sold) !important; }
         .badge-own { background: var(--secondary); } .badge-shared { background: var(--shared); }
         .badge-sicak { background: #e74c3c; } .badge-ilik { background: #f39c12; } .badge-soguk { background: #95a5a6; }
+        
+        /* YENİ CRM BADGE STİLLERİ */
+        .badge-crm-safe { background: #27ae60; color:white; font-size:12px; padding:6px 10px; border-radius:4px; display:inline-block; min-width:80px; text-align:center; }
+        .badge-crm-danger { background: #c0392b; color:white; font-size:13px; font-weight:900; padding:6px 10px; border-radius:4px; display:inline-block; min-width:80px; text-align:center; animation: pulse 2s infinite; }
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
         .type-text { display: block; font-weight: 900; text-transform: uppercase; font-size: 12px; margin-top: 3px; color: #444; }
         
         /* Linkler */
@@ -122,14 +133,13 @@
         
         .print-only { display: none; }
         
-        /* --- YAZDIRMA AYARLARI (DÜZELTİLDİ) --- */
+        /* --- YAZDIRMA AYARLARI --- */
         @media print { 
             body, .container, #appContainer { background-color: white !important; -webkit-print-color-adjust: exact; margin: 0; padding: 0; }
             .input-panel, .filter-bar, .backup-controls, .tools-bar, #loginOverlay, .no-print, .btn-print-selected, .btn-whatsapp-selected { display: none !important; } 
             .print-only { display: table-cell !important; } 
             #appContainer { display: block !important; } 
             
-            /* Tablo ve hücrelerin arka planını BEYAZ yap */
             table, th, td, tr { background-color: white !important; border: 1px solid #ddd; padding: 3px !important; color: black; vertical-align: top; }
             table { width: 100%; font-size: 9px; } 
             
@@ -139,7 +149,6 @@
             body.print-selected-mode tbody tr:not(.row-selected) { display: none !important; }
             body.print-selected-mode .select-col-header, body.print-selected-mode .select-col-cell { display: none !important; }
             
-            /* Seçili satır rengini de BEYAZ yap */
             body.print-selected-mode tbody tr.row-selected { background-color: white !important; }
         }
     </style>
@@ -149,7 +158,7 @@
 <div id="loginOverlay">
     <div class="login-box">
         <h2>🔒 GÜVENLİ GİRİŞ</h2>
-        <p>KaracabayRE.EST v55</p>
+        <p>KaracabayRE.EST v56</p>
         <input type="password" id="loginPin" placeholder="Şifre (1923)" inputmode="numeric">
         <button onclick="checkLogin()">GİRİŞ YAP</button>
     </div>
@@ -158,7 +167,10 @@
 <div id="appContainer">
     <div class="container">
         <header>
-            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v55 (Print White BG Fix)</span></h1></div>
+            <div class="app-title-group">
+                <h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px; vertical-align:middle;">v56</span></h1>
+                <div class="app-subtitle">🏠 EMLAK ASİSTANI</div>
+            </div>
             <div class="backup-controls">
                 <input type="file" id="fileUpload" style="display:none;" onclick="this.value=null" onchange="uploadData(this)">
                 <button class="btn-backup" onclick="document.getElementById('fileUpload').click()">📂 YÜKLE</button>
@@ -174,8 +186,8 @@
             
             <button class="tool-btn btn-crm" onclick="openCRM()"><i class="fa-solid fa-users"></i> CRM</button>
             <button class="tool-btn btn-calc" onclick="openModal('calcModal')"><i class="fa-solid fa-calculator"></i> Hesap Mak.</button>
-            <button class="tool-btn btn-calc" onclick="openModal('currencyModal'); fetchCurrency();"><i class="fa-solid fa-money-bill-transfer"></i> Döviz (v27)</button>
-            <button class="tool-btn btn-calc" onclick="openModal('realEstateCalcModal')"><i class="fa-solid fa-file-contract"></i> Emlak (v27)</button>
+            <button class="tool-btn btn-calc" onclick="openModal('currencyModal'); fetchCurrency();"><i class="fa-solid fa-money-bill-transfer"></i> Döviz</button>
+            <button class="tool-btn btn-calc" onclick="openModal('realEstateCalcModal')"><i class="fa-solid fa-file-contract"></i> Emlak</button>
             <a href="https://www.hesapkurdu.com/konut-kredisi/h/gayrimenkul-deger-artis-kazanci-vergisi-hesaplama" target="_blank" class="tool-btn btn-calc"><i class="fa-solid fa-calculator"></i> DAKV</a>
             
             <a href="https://parselsorgu.tkgm.gov.tr/" target="_blank" class="tool-btn btn-link"><i class="fa-solid fa-map-location-dot"></i> TKGM Parsel</a>
@@ -271,7 +283,7 @@
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
-        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v55 Print White BG Fix)</div>
+        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v56 Final Design)</div>
     </div>
 </div>
 
@@ -867,20 +879,29 @@
         }); 
     }
     
-    // YENİ GÜNCELLEME BURADA: İKİ BUTON TEK SÜTUNDA BİRLEŞTİRİLDİ
+    // YENİ GÜNCELLEME BURADA: Yeşil/Kırmızı Kutu Sayaç Mantığı
     function renderNetwork() { 
         const tbody = document.getElementById('networkTableBody'); tbody.innerHTML = ''; const today = new Date(); 
         crmData.network.forEach(net => { 
-            let lastCallDate = new Date(net.lastCall || today); let diffTime = Math.abs(today - lastCallDate); let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); let statusBadge = ''; 
-            if(diffDays <= 30) statusBadge = `<span class="badge badge-time-ok">${diffDays} Gün Oldu</span>`; else if(diffDays <= 45) statusBadge = `<span class="badge badge-time-warn">${diffDays} Gün Oldu</span>`; else statusBadge = `<span class="badge badge-time-danger">⚠️ ${diffDays} Gün! (ARA)</span>`; 
+            let lastCallDate = new Date(net.lastCall || today); 
+            let diffTime = Math.abs(today - lastCallDate); 
+            let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            
+            let statusBadge = '';
+            if(diffDays >= 45) {
+                statusBadge = `<span class="badge-crm-danger">📞 ARA</span>`;
+            } else {
+                statusBadge = `<span class="badge-crm-safe">${diffDays} Gün Oldu</span>`;
+            }
+
             tbody.innerHTML += `
             <tr>
                 <td><b>${net.name}</b></td>
                 <td>${net.job}<br><small>${net.city}</small></td>
                 <td>${net.phone}</td>
                 <td>${net.relation}</td>
-                <td>${net.lastCall}<br>${statusBadge}</td>
-                <td><span class="badge ${getStatusClass(diffDays)}">${getStatusText(diffDays)}</span></td>
+                <td>${net.lastCall}</td>
+                <td style="text-align:center;">${statusBadge}</td>
                 <td><small>${net.note || '-'}</small></td>
                 <td style="display:flex; gap:5px; justify-content:center;">
                     <button onclick="resetNetworkTimer(${net.id})" style="background:#3498db; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px;">📞 GÖRÜŞTÜM</button>
@@ -889,9 +910,6 @@
             </tr>`; 
         }); 
     }
-    
-    function getStatusClass(days) { return days<=30 ? 'badge-sicak' : (days<=45 ? 'badge-ilik' : 'badge-soguk'); }
-    function getStatusText(days) { return days<=30 ? 'Aktif' : (days<=45 ? 'Normal' : 'Pasif'); }
 
     function resetNetworkTimer(id) { if(confirm("Görüşme yapıldı olarak işaretlensin mi? Tarih bugün olacak.")) { const idx = crmData.network.findIndex(n => n.id === id); if(idx > -1) { crmData.network[idx].lastCall = new Date().toISOString().split('T')[0]; saveCRM(); renderNetwork(); } } }
     function editCRMInvestor(id) { const i = crmData.investors.find(x => x.id === id); if(!i) return; crmEditingId = id; document.getElementById('invName').value = i.name; document.getElementById('invPhone').value = i.phone; document.getElementById('invType').value = i.type; document.getElementById('invRegion').value = i.region; document.getElementById('invBudget').value = i.budget; document.getElementById('invStatus').value = i.status; document.getElementById('invNote').value = i.note; document.getElementById('btnInvSave').innerText = "GÜNCELLE"; document.getElementById('btnInvDelete').style.display = "inline-block"; }
