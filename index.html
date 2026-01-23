@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KARACABAYRE.EST - v53 (CRM Fix)</title>
+    <title>KARACABAYRE.EST - v54 (Button Fit Fix)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -145,7 +145,7 @@
 <div id="loginOverlay">
     <div class="login-box">
         <h2>🔒 GÜVENLİ GİRİŞ</h2>
-        <p>KaracabayRE.EST v53</p>
+        <p>KaracabayRE.EST v54</p>
         <input type="password" id="loginPin" placeholder="Şifre (1923)" inputmode="numeric">
         <button onclick="checkLogin()">GİRİŞ YAP</button>
     </div>
@@ -154,7 +154,7 @@
 <div id="appContainer">
     <div class="container">
         <header>
-            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v53 (CRM Fix)</span></h1></div>
+            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v54 (Button Fit Fix)</span></h1></div>
             <div class="backup-controls">
                 <input type="file" id="fileUpload" style="display:none;" onclick="this.value=null" onchange="uploadData(this)">
                 <button class="btn-backup" onclick="document.getElementById('fileUpload').click()">📂 YÜKLE</button>
@@ -267,7 +267,7 @@
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
-        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v53 CRM Fix)</div>
+        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v54 Button Fit Fix)</div>
     </div>
 </div>
 
@@ -353,7 +353,7 @@
             </div>
             <div class="table-scroll-wrapper">
                 <table class="crm-table">
-                    <thead><tr><th width="17%">Ad Soyad</th><th width="13%">Meslek/Şehir</th><th width="12%">Telefon</th><th width="10%">Yakınlık</th><th width="10%">Son Arama</th><th width="8%">Durum</th><th width="20%">Notlar</th><th width="10%">İşlem</th></tr></thead>
+                    <thead><tr><th width="16%">Ad Soyad</th><th width="12%">Meslek/Şehir</th><th width="12%">Telefon</th><th width="10%">Yakınlık</th><th width="10%">Son Arama</th><th width="8%">Durum</th><th width="14%">Notlar</th><th width="18%">İşlem</th></tr></thead>
                     <tbody id="networkTableBody"></tbody>
                 </table>
             </div>
@@ -863,12 +863,26 @@
         }); 
     }
     
+    // YENİ GÜNCELLEME BURADA: İKİ BUTON TEK SÜTUNDA BİRLEŞTİRİLDİ
     function renderNetwork() { 
         const tbody = document.getElementById('networkTableBody'); tbody.innerHTML = ''; const today = new Date(); 
         crmData.network.forEach(net => { 
             let lastCallDate = new Date(net.lastCall || today); let diffTime = Math.abs(today - lastCallDate); let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); let statusBadge = ''; 
             if(diffDays <= 30) statusBadge = `<span class="badge badge-time-ok">${diffDays} Gün Oldu</span>`; else if(diffDays <= 45) statusBadge = `<span class="badge badge-time-warn">${diffDays} Gün Oldu</span>`; else statusBadge = `<span class="badge badge-time-danger">⚠️ ${diffDays} Gün! (ARA)</span>`; 
-            tbody.innerHTML += `<tr><td><b>${net.name}</b></td><td>${net.job}<br><small>${net.city}</small></td><td>${net.phone}</td><td>${net.relation}</td><td>${net.lastCall}<br>${statusBadge}</td><td><span class="badge ${getStatusClass(diffDays)}">${getStatusText(diffDays)}</span></td><td><small>${net.note || '-'}</small></td><td style="text-align:center;"><button onclick="resetNetworkTimer(${net.id})" style="background:#3498db; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px; margin-bottom:5px;">📞 GÖRÜŞTÜM</button></td><td><button onclick="editCRMNetwork(${net.id})">DÜZENLE</button></td></tr>`; 
+            tbody.innerHTML += `
+            <tr>
+                <td><b>${net.name}</b></td>
+                <td>${net.job}<br><small>${net.city}</small></td>
+                <td>${net.phone}</td>
+                <td>${net.relation}</td>
+                <td>${net.lastCall}<br>${statusBadge}</td>
+                <td><span class="badge ${getStatusClass(diffDays)}">${getStatusText(diffDays)}</span></td>
+                <td><small>${net.note || '-'}</small></td>
+                <td style="display:flex; gap:5px; justify-content:center;">
+                    <button onclick="resetNetworkTimer(${net.id})" style="background:#3498db; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px;">📞 GÖRÜŞTÜM</button>
+                    <button onclick="editCRMNetwork(${net.id})" style="background:#f39c12; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px;">DÜZENLE</button>
+                </td>
+            </tr>`; 
         }); 
     }
     
