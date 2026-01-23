@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KARACABAYRE.EST - v51 (iOS Print Fix)</title>
+    <title>KARACABAYRE.EST - v52 (Print & CRM Fix)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -122,14 +122,20 @@
         
         .print-only { display: none; }
         
-        /* iPhone ve Yazdırma Ayarları */
+        /* --- YAZDIRMA AYARLARI (GELİŞTİRİLMİŞ) --- */
         @media print { 
+            /* Mavi fon sorununu çözmek için arka planı beyaz yap */
+            body, .container { background-color: white !important; -webkit-print-color-adjust: exact; margin: 0; padding: 0; }
             .input-panel, .filter-bar, .backup-controls, .tools-bar, #loginOverlay, .no-print, .btn-print-selected, .btn-whatsapp-selected { display: none !important; } 
             .print-only { display: table-cell !important; } 
             #appContainer { display: block !important; } 
-            body { background: white; padding: 0; margin: 0; } 
-            table { width: 100%; font-size: 10px; } 
-            th, td { border: 1px solid #ddd; padding: 4px; color: black; } 
+            
+            table { width: 100%; font-size: 9px; } /* Yazıları biraz küçült */
+            th, td { border: 1px solid #ddd; padding: 3px !important; color: black; vertical-align: top; } 
+            
+            /* Üst üste binmeleri engelle */
+            .badge { display: inline-block; margin-bottom: 1px; font-size: 8px !important; border: 1px solid #ccc; padding: 1px 2px; }
+            td br { display: block; margin: 1px 0; }
             
             /* Seçilmeyen satırları GİZLE */
             body.print-selected-mode tbody tr:not(.row-selected) { display: none !important; }
@@ -142,7 +148,7 @@
 <div id="loginOverlay">
     <div class="login-box">
         <h2>🔒 GÜVENLİ GİRİŞ</h2>
-        <p>KaracabayRE.EST v51</p>
+        <p>KaracabayRE.EST v52</p>
         <input type="password" id="loginPin" placeholder="Şifre (1923)" inputmode="numeric">
         <button onclick="checkLogin()">GİRİŞ YAP</button>
     </div>
@@ -151,7 +157,7 @@
 <div id="appContainer">
     <div class="container">
         <header>
-            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v51 (iOS Fix)</span></h1></div>
+            <div><h1>🏢 KARACABAYRE.EST <span style="font-size:12px; color:#27ae60; border:1px solid #27ae60; padding:2px 8px; border-radius:10px;">v52 (Print & CRM Fix)</span></h1></div>
             <div class="backup-controls">
                 <input type="file" id="fileUpload" style="display:none;" onclick="this.value=null" onchange="uploadData(this)">
                 <button class="btn-backup" onclick="document.getElementById('fileUpload').click()">📂 YÜKLE</button>
@@ -264,7 +270,7 @@
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
-        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v51 iOS Fix)</div>
+        <div class="legal-footer">Veriler yerel tarayıcıda saklanır. (v52 Print Fix)</div>
     </div>
 </div>
 
@@ -326,7 +332,7 @@
             </div>
             <div class="table-scroll-wrapper">
                 <table class="crm-table">
-                    <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Talep / Bölge</th><th>Bütçe</th><th>Durum</th><th width="80px">İşlem</th></tr></thead>
+                    <thead><tr><th>Ad Soyad</th><th>Telefon</th><th>Talep / Bölge</th><th>Bütçe</th><th>Durum</th><th>Notlar</th><th width="80px">İşlem</th></tr></thead>
                     <tbody id="investorTableBody"></tbody>
                 </table>
             </div>
@@ -350,7 +356,7 @@
             </div>
             <div class="table-scroll-wrapper">
                 <table class="crm-table">
-                    <thead><tr><th width="20%">Ad Soyad</th><th width="15%">Meslek/Şehir</th><th width="15%">Telefon</th><th width="10%">Yakınlık</th><th width="15%">Son Arama</th><th width="10%">Durum</th><th width="15%">İşlem</th></tr></thead>
+                    <thead><tr><th width="20%">Ad Soyad</th><th width="15%">Meslek/Şehir</th><th width="15%">Telefon</th><th width="10%">Yakınlık</th><th width="15%">Son Arama</th><th width="10%">Durum</th><th>Notlar</th><th width="15%">İşlem</th></tr></thead>
                     <tbody id="networkTableBody"></tbody>
                 </table>
             </div>
@@ -850,8 +856,28 @@
     function deleteCRMInvestor() { if(confirm('Sil?')) { crmData.investors = crmData.investors.filter(i => i.id !== crmEditingId); saveCRM(); renderInvestors(); resetCRMForm('investors'); } }
     function deleteCRMNetwork() { if(confirm('Sil?')) { crmData.network = crmData.network.filter(n => n.id !== crmEditingId); saveCRM(); renderNetwork(); resetCRMForm('network'); } }
     function resetCRMForm(type) { crmEditingId = null; if(type === 'investors') { document.querySelectorAll('#crmInvestors input, #crmInvestors textarea').forEach(i=>i.value=''); document.getElementById('btnInvSave').innerText = "KAYDET"; document.getElementById('btnInvDelete').style.display = "none"; } else { document.querySelectorAll('#crmNetwork input, #crmNetwork textarea').forEach(i=>i.value=''); document.getElementById('netCity').value = 'Antalya'; document.getElementById('netLastCall').valueAsDate = new Date(); document.getElementById('btnNetSave').innerText = "KAYDET"; document.getElementById('btnNetDelete').style.display = "none"; } }
-    function renderInvestors() { const tbody = document.getElementById('investorTableBody'); tbody.innerHTML = ''; crmData.investors.forEach(inv => { let sClass = inv.status==='Sıcak'?'badge-sicak':(inv.status==='Ilık'?'badge-ilik':'badge-soguk'); tbody.innerHTML += `<tr><td><b>${inv.name}</b></td><td>${inv.phone}</td><td>${inv.type} - ${inv.region}</td><td>${inv.budget} TL</td><td><span class="badge ${sClass}">${inv.status}</span></td><td><button onclick="editCRMInvestor(${inv.id})">DÜZENLE</button></td></tr>`; }); }
-    function renderNetwork() { const tbody = document.getElementById('networkTableBody'); tbody.innerHTML = ''; const today = new Date(); crmData.network.forEach(net => { let lastCallDate = new Date(net.lastCall || today); let diffTime = Math.abs(today - lastCallDate); let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); let statusBadge = ''; if(diffDays <= 30) statusBadge = `<span class="badge badge-time-ok">${diffDays} Gün Oldu</span>`; else if(diffDays <= 45) statusBadge = `<span class="badge badge-time-warn">${diffDays} Gün Oldu</span>`; else statusBadge = `<span class="badge badge-time-danger">⚠️ ${diffDays} Gün! (ARA)</span>`; tbody.innerHTML += `<tr><td><b>${net.name}</b></td><td>${net.job}<br><small>${net.city}</small></td><td>${net.phone}</td><td>${net.relation}</td><td>${net.lastCall}<br>${statusBadge}</td><td style="text-align:center;"><button onclick="resetNetworkTimer(${net.id})" style="background:#3498db; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px; margin-bottom:5px;">📞 GÖRÜŞTÜM</button></td><td><button onclick="editCRMNetwork(${net.id})">DÜZENLE</button></td></tr>`; }); }
+    
+    // GÜNCELLENEN CRM LİSTELEME (NOTLAR EKLENDİ)
+    function renderInvestors() { 
+        const tbody = document.getElementById('investorTableBody'); tbody.innerHTML = ''; 
+        crmData.investors.forEach(inv => { 
+            let sClass = inv.status==='Sıcak'?'badge-sicak':(inv.status==='Ilık'?'badge-ilik':'badge-soguk'); 
+            tbody.innerHTML += `<tr><td><b>${inv.name}</b></td><td>${inv.phone}</td><td>${inv.type} - ${inv.region}</td><td>${inv.budget} TL</td><td><span class="badge ${sClass}">${inv.status}</span></td><td><small>${inv.note || '-'}</small></td><td><button onclick="editCRMInvestor(${inv.id})">DÜZENLE</button></td></tr>`; 
+        }); 
+    }
+    
+    function renderNetwork() { 
+        const tbody = document.getElementById('networkTableBody'); tbody.innerHTML = ''; const today = new Date(); 
+        crmData.network.forEach(net => { 
+            let lastCallDate = new Date(net.lastCall || today); let diffTime = Math.abs(today - lastCallDate); let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); let statusBadge = ''; 
+            if(diffDays <= 30) statusBadge = `<span class="badge badge-time-ok">${diffDays} Gün Oldu</span>`; else if(diffDays <= 45) statusBadge = `<span class="badge badge-time-warn">${diffDays} Gün Oldu</span>`; else statusBadge = `<span class="badge badge-time-danger">⚠️ ${diffDays} Gün! (ARA)</span>`; 
+            tbody.innerHTML += `<tr><td><b>${net.name}</b></td><td>${net.job}<br><small>${net.city}</small></td><td>${net.phone}</td><td>${net.relation}</td><td>${net.lastCall}<br>${statusBadge}</td><td><span class="badge ${getStatusClass(diffDays)}">${getStatusText(diffDays)}</span></td><td><small>${net.note || '-'}</small></td><td style="text-align:center;"><button onclick="resetNetworkTimer(${net.id})" style="background:#3498db; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:11px; margin-bottom:5px;">📞 GÖRÜŞTÜM</button></td><td><button onclick="editCRMNetwork(${net.id})">DÜZENLE</button></td></tr>`; 
+        }); 
+    }
+    
+    function getStatusClass(days) { return days<=30 ? 'badge-sicak' : (days<=45 ? 'badge-ilik' : 'badge-soguk'); }
+    function getStatusText(days) { return days<=30 ? 'Aktif' : (days<=45 ? 'Normal' : 'Pasif'); }
+
     function resetNetworkTimer(id) { if(confirm("Görüşme yapıldı olarak işaretlensin mi? Tarih bugün olacak.")) { const idx = crmData.network.findIndex(n => n.id === id); if(idx > -1) { crmData.network[idx].lastCall = new Date().toISOString().split('T')[0]; saveCRM(); renderNetwork(); } } }
     function editCRMInvestor(id) { const i = crmData.investors.find(x => x.id === id); if(!i) return; crmEditingId = id; document.getElementById('invName').value = i.name; document.getElementById('invPhone').value = i.phone; document.getElementById('invType').value = i.type; document.getElementById('invRegion').value = i.region; document.getElementById('invBudget').value = i.budget; document.getElementById('invStatus').value = i.status; document.getElementById('invNote').value = i.note; document.getElementById('btnInvSave').innerText = "GÜNCELLE"; document.getElementById('btnInvDelete').style.display = "inline-block"; }
     function editCRMNetwork(id) { const n = crmData.network.find(x => x.id === id); if(!n) return; crmEditingId = id; document.getElementById('netName').value = n.name; document.getElementById('netPhone').value = n.phone; document.getElementById('netJob').value = n.job; document.getElementById('netCity').value = n.city; document.getElementById('netRelation').value = n.relation; document.getElementById('netNote').value = n.note; document.getElementById('netLastCall').value = n.lastCall; document.getElementById('btnNetSave').innerText = "GÜNCELLE"; document.getElementById('btnNetDelete').style.display = "inline-block"; }
